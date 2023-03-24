@@ -67,7 +67,7 @@
             </div>
         </div>
         <div class="modal-footer">
-          <button type="button" onclick=saveCustomer() class="btn btn-primary">Save</button>
+          <button type="submit" class="btn btn-primary">Save</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
         </div>
       </form>
@@ -130,7 +130,7 @@
             </div>
         </div>
         <div class="modal-footer">
-          <button type="button" onclick=updateCustomer() class="btn btn-primary">Save</button>
+          <button type="submit" class="btn btn-primary">Save</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
         </div>
       </form>
@@ -172,25 +172,27 @@ function addCustomer() {
   $('#new-customer-modal').modal('show');
 }
 
-function saveCustomer() {
-  $.ajax({
-    url: '/Customer',
-    type: 'POST',
-    dataType: 'json',
-    data: $('#new-customer-form').serialize() + "&_token="+"{{ csrf_token() }}",
-    success: function(data) {
-      if(data.success==true){
-        alert("Data Saved");
-        location.reload();
-      }else{
-        alert("Save Failed");
+$("#new-customer-form").on("submit", function() {      
+    $.ajax({
+      url: '/Customer',
+      type: 'POST',
+      dataType: 'json',
+      data: $('#new-customer-form').serialize() + "&_token="+"{{ csrf_token() }}",
+      success: function(data) {
+        if(data.success==true){
+          alert("Data Saved");
+          location.reload();
+        }else{
+          alert("Save Failed");
+        }
+      },
+      error: function(response) {
+        var data = response.responseJSON;
+        alert(data.error);
       }
-    },
-    error: function(jqXHR, textStatus, errorThrown) {
-      console.log(textStatus, errorThrown);
-    }
-  });
-}
+    });
+})
+
 
 function showCustomer(id) {
   $.ajax({
@@ -207,8 +209,9 @@ function showCustomer(id) {
       );
       $('#customer-modal').modal('show');
     },
-    error: function(jqXHR, textStatus, errorThrown) {
-      console.log(textStatus, errorThrown);
+    error: function(response) {
+      var data = response.responseJSON;
+      alert(data.error);
     }
   });
 }
@@ -227,13 +230,14 @@ function editCustomer(id) {
       $('#edit-customer-form #address').val(data[0].address);
       $('#edit-customer-modal').modal('show');
     },
-    error: function(jqXHR, textStatus, errorThrown) {
-      console.log(textStatus, errorThrown);
+    error: function(response) {
+      var data = response.responseJSON;
+      alert(data.error);
     }
   });
 }
 
-function updateCustomer() {
+$("#edit-customer-form").on("submit", function() {      
   id=$('#edit-customer-form input[name="id"]').val();
   $.ajax({
     url: '/Customer/' + id,
@@ -248,11 +252,12 @@ function updateCustomer() {
         alert("Save Failed");
       }
     },
-    error: function(jqXHR, textStatus, errorThrown) {
-      console.log(textStatus, errorThrown);
+    error: function(response) {
+      var data = response.responseJSON;
+      alert(data.error);
     }
   });
-}
+})
 
 function deleteCustomer(id) {
   if (confirm('Are you sure to delete this customer?')) {
@@ -267,8 +272,9 @@ function deleteCustomer(id) {
         alert("Data Deleted");
         location.reload();
       },
-      error: function(jqXHR, textStatus, errorThrown) {
-        console.log(textStatus, errorThrown);
+      error: function(response) {
+        var data = response.responseJSON;
+        alert(data.error);
       }
   });
 }}

@@ -25,18 +25,17 @@ class CustomerController extends Controller
         if(!$id) return response()->json(["error" => "Harap masukkan id"]);
         
         $customer = Customer_model::where("id",$id)->first();
-        if(!$customer) return response()->json(["error" => "Customer tidak ditemukan"]);
+        if(!$customer) return response()->json(['error' => "Customer tidak ditemukan"]);
         return response()->json([$customer], 200);
     }
 
     public function addCustomer(Request $request){
-        \Log::debug($request);
         $validator = Validator::make($request->all(), [
             'name' => 'bail|required|max:100',
-            'email' => 'bail|required|max:100',
+            'email' => 'bail|required|email|max:100',
             'password' => 'bail|required|max:100',
             'gender' => 'bail|required|in:FEMALE,MALE',
-            'is_married' => 'bail|required',
+            'is_married' => 'bail|required|in:MARRIED,SINGLE',
             'address' => 'bail|required|max:100'
         ]);
         if ($validator->fails()) {
@@ -65,16 +64,16 @@ class CustomerController extends Controller
         catch(\Exception $e) {
             DB::rollback();
             \Log::info($e);
-            return response()->json(["success" => false]);
+            return response()->json(["error" => "Save gagal"]);
         }
     }
 
     public function updateCustomer(Request $request,$id){
         $validator = Validator::make($request->all(), [
             'name' => 'bail|required|max:100',
-            'email' => 'bail|required|max:100',
-            'gender' => 'bail|required|max:10',
-            'is_married' => 'bail|required',
+            'email' => 'bail|required|email|max:100',
+            'gender' => 'bail|required|in:FEMALE,MALE',
+            'is_married' => 'bail|required|in:MARRIED,SINGLE',
             'address' => 'bail|required|max:100'
         ]);
         if ($validator->fails()) {
@@ -107,7 +106,7 @@ class CustomerController extends Controller
         catch(\Exception $e) {
             DB::rollback();
             \Log::info($e);
-            return response()->json(["success" => "False"]);
+            return response()->json(["error" => "Save gagal"]);
         }
     }
 
@@ -116,7 +115,11 @@ class CustomerController extends Controller
         try {
             DB::beginTransaction();
 
-            Customer_model::find($id)->delete();
+            $customer = Customer_model::where('id',$id)->first();
+
+            if(!$customer) return response()->json(["error" => "Customer tidak ditemukan"]);
+            
+            $customer->delete();
             
             $response = [
                 'success' => true,
